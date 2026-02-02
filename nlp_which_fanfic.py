@@ -2,9 +2,11 @@ import nltk
 import csv
 from collections import Counter,defaultdict
 import ast
-#nltk.download('punkt_tab')
-#nltk.download('averaged_perceptron_tagger_eng')
-
+import gender_guesser.detector as gender
+'''nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('averaged_perceptron_tagger_eng')
+'''
 
 
 def safe_literal_eval(value):
@@ -16,7 +18,7 @@ def safe_literal_eval(value):
 s="he she they them her their him it"
 
 tokens=nltk.word_tokenize(s)
-#print(tokens)
+print(tokens)
 
 tagged=nltk.pos_tag(tokens)
 #print(tagged)
@@ -57,10 +59,15 @@ for k in relationships:
     
 #print(relationships)
 
-print(Characters)
+"""print(Characters)
 print(Ship)
-print(RelationShipType)
+print(RelationShipType)"""
 
 
 
 #For ease of work, we will use the harry potter books series, written by known transphobe and racist JK Rowling
+
+
+with open("harrypotter1.txt", "r", encoding="utf-8") as f:
+    hp1 = f.read()
+
