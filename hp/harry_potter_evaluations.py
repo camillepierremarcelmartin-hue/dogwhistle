@@ -15,13 +15,13 @@ def safe_literal_eval(value):
     return ast.literal_eval(value)
 
 
-with open('data_complete_clean.csv') as datacsv:
+with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv') as datacsv:
     cols=csv.reader(datacsv,delimiter=';')
     header=next(cols)
 
 oeuvres=defaultdict(int)
 
-with open('data_complete_clean.csv', newline='', encoding="utf-8") as f:
+with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
     reader = csv.DictReader(f,delimiter=";")
     for ligne in reader:
         oeuvres[ligne["title_oeuvre"]] += 1
@@ -32,7 +32,7 @@ print(oeuvres)
 values = []
 relationships=[]
 models=['F/M','M/M','F/F']
-with open('data_complete_clean.csv', newline='', encoding="utf-8") as f:
+with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
     reader = csv.DictReader(f,delimiter=";")
     for ligne in reader:
         if ligne["title_oeuvre"]=='Harry Potter - J. K. Rowling':
@@ -62,10 +62,11 @@ print(RelationShipType)"""
 
 
 
-#For ease of work, we will use the harry potter books series, written by known transphobe and racist JK Rowling
 
-"""d=gender.Detector()
-gendered_characters=defaultdict(int)
+d=gender.Detector()
+gen=d.get_gender("Vader")
+print(gen)
+"""gendered_characters=defaultdict(int)
 for k in Characters.keys():
     name=k.split(" ")[0]
     gen=d.get_gender(name)
@@ -83,37 +84,37 @@ type_of_pronouns=["PRP","PRP$"]
 
 how_many_pronouns=defaultdict(int)
 gendered_characters_canon=defaultdict(int)
-with open("harrypotter1.txt", "r", encoding="utf-8") as f1:
+with open("/hp/harrypotter1.txt", "r", encoding="utf-8") as f1:
     hp1 = f1.read()
 hp1_tokens=nltk.word_tokenize(hp1)
 hp1_tags=nltk.pos_tag(hp1_tokens)
 
-with open("harrypotter2.txt", "r", encoding="utf-8") as f2:
+with open("/hp/harrypotter2.txt", "r", encoding="utf-8") as f2:
     hp2 = f2.read()
 hp2_tokens=nltk.word_tokenize(hp2)
 hp2_tags=nltk.pos_tag(hp2_tokens)
 
-with open("harrypotter3.txt", "r", encoding="utf-8") as f3:
+with open("/hp/harrypotter3.txt", "r", encoding="utf-8") as f3:
     hp3 = f3.read()
 hp3_tokens=nltk.word_tokenize(hp3)
 hp3_tags=nltk.pos_tag(hp3_tokens)
 
-with open("harrypotter4.txt", "r", encoding="utf-8") as f4:
+with open("/hp/harrypotter4.txt", "r", encoding="utf-8") as f4:
     hp4 = f4.read()
 hp4_tokens=nltk.word_tokenize(hp4)
 hp4_tags=nltk.pos_tag(hp4_tokens)
 
-with open("harrypotter5.txt", "r", encoding="utf-8") as f5:
+with open("/hp/harrypotter5.txt", "r", encoding="utf-8") as f5:
     hp5 = f5.read()
 hp5_tokens=nltk.word_tokenize(hp5)
 hp5_tags=nltk.pos_tag(hp5_tokens)
 
-with open("harrypotter6.txt", "r", encoding="utf-8") as f6:
+with open("/hp/harrypotter6.txt", "r", encoding="utf-8") as f6:
     hp6 = f6.read()
 hp6_tokens=nltk.word_tokenize(hp6)
 hp6_tags=nltk.pos_tag(hp6_tokens)
 
-with open("harrypotter7.txt", "r", encoding="utf-8") as f7:
+with open("/hp/harrypotter7.txt", "r", encoding="utf-8") as f7:
     hp7 = f7.read()
 hp7_tokens=nltk.word_tokenize(hp7)
 hp7_tags=nltk.pos_tag(hp7_tokens)
@@ -144,8 +145,22 @@ while i < len(corpus_tags):
                 gendered_characters_canon['female_characters']+=1
             else:
                 gendered_characters_canon['neutral_characters']+=1
-    i+=1
+    i+=1"""
 
-print(how_many_pronouns)
+"""print(how_many_pronouns)
 print(gendered_characters)
 print(gendered_characters_canon)"""
+
+
+"""Résultats pour Harry Potter
+{'neutral_pronoun': 27795, 'masc_pronoun': 44252, 'fem_pronoun': 10758})
+{'male_characters': 37, 'neutral_characters': 39, 'female_characters': 25})
+{'neutral_characters': 4315, 'male_characters': 254, 'female_characters': 159})
+
+
+cannon and heavily implied relation ships
+
+F/M: Harry/Ginny, Ron/Hermione, Bill/Fleur, Remus/Tonks, James/Lily, Andromeda/Ted, Narcissa/Lucius (heavily implied)
+M/M: Dumbledore/Grindelwald (heavily implied)
+
+"""

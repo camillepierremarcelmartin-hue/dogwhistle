@@ -3,6 +3,7 @@ import csv
 from collections import Counter,defaultdict
 import ast
 import gender_guesser.detector as gender
+import os
 '''nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger_eng')
@@ -14,7 +15,53 @@ def safe_literal_eval(value):
         return []          
     return ast.literal_eval(value)
 
+#Needed to modify some text files to make it so that it works properly haha
 
+def strip_number_and_name(line):
+  
+    parts = line.split('"')
+   
+    if len(parts) >= 6:
+        return parts[5].strip()
+    else:
+        return line.strip()  # fallback if format unexpected
+
+
+
+
+def modify(file):
+    new_lines = []
+    new_file = os.path.join(os.path.dirname(file), "new_" + os.path.basename(file))
+    with open(file, "r", encoding="utf-8") as fin, \
+        open(new_file, "w", encoding="utf-8") as fout:
+        L=fin.readlines()
+        for i in range(1,len(L)):
+            line = strip_number_and_name(L[i])
+            fout.write(line + "\n")       # add newline
+            new_lines.append(line)  
+
+  
+    os.replace(new_file, file)
+
+#modify("sw4.txt")
+#modify("sw5.txt")
+#modify('sw6.txt')
+
+
+
+with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv') as datacsv:
+    cols=csv.reader(datacsv,delimiter=';')
+    header=next(cols)
+
+oeuvres=defaultdict(int)
+
+with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
+    reader = csv.DictReader(f,delimiter=";")
+    for ligne in reader:
+        oeuvres[ligne["title_oeuvre"]] += 1
+
+#print(header)
+#print(oeuvres)
 
 values = []
 relationships=[]
@@ -22,7 +69,7 @@ models=['F/M','M/M','F/F']
 with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
     reader = csv.DictReader(f,delimiter=";")
     for ligne in reader:
-        if ligne["title_oeuvre"]=='TOLKIEN J. R. R. - Works & Related Fandoms':
+        if ligne["title_oeuvre"]=='Star Wars - All Media Types':
           
             relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags'])])
 
@@ -51,6 +98,8 @@ print(RelationShipType)
 
 
 d=gender.Detector()
+gen=d.get_gender("Vader")
+print(gen)
 gendered_characters=defaultdict(int)
 for k in Characters.keys():
     name=k.split(" ")[0]
@@ -69,27 +118,23 @@ type_of_pronouns=["PRP","PRP$"]
 
 how_many_pronouns=defaultdict(int)
 gendered_characters_canon=defaultdict(int)
-with open("lotr1.txt", "r", encoding="latin-1") as f1:
-    lotr1 = f1.read()
-lotr1_tokens=nltk.word_tokenize(lotr1)
-lotr1_tags=nltk.pos_tag(lotr1_tokens)
+with open("sw4.txt", "r", encoding="utf-8") as f1:
+    sw4 = f1.read()
+sw4_tokens=nltk.word_tokenize(sw4)
+sw4_tags=nltk.pos_tag(sw4_tokens)
 
-with open("lotr2.txt", "r", encoding="latin-1") as f2:
-    lotr2 = f2.read()
-lotr2_tokens=nltk.word_tokenize(lotr2)
-lotr2_tags=nltk.pos_tag(lotr2_tokens)
+with open("sw5.txt", "r", encoding="utf-8") as f2:
+    sw5 = f2.read()
+sw5_tokens=nltk.word_tokenize(sw5)
+sw5_tags=nltk.pos_tag(sw5_tokens)
 
-with open("lotr3.txt", "r", encoding="latin-1") as f3:
-    lotr3 = f3.read()
-lotr3_tokens=nltk.word_tokenize(lotr3)
-lotr3_tags=nltk.pos_tag(lotr3_tokens)
+with open("sw6.txt", "r", encoding="utf-8") as f3:
+    sw6 = f3.read()
+sw6_tokens=nltk.word_tokenize(sw6)
+sw6_tags=nltk.pos_tag(sw6_tokens)
 
-with open("hobbit.txt", "r", encoding="latin-1") as f4:
-    hobbit = f4.read()
-hobbit_tokens=nltk.word_tokenize(hobbit)
-hobbit_tags=nltk.pos_tag(hobbit_tokens)
 
-corpus_tags=lotr1_tags+lotr2_tags+lotr3_tags+hobbit_tags
+corpus_tags=sw4_tags+sw5_tags+sw6_tags
 character_list_cannon=[]
 i=0
 while i < len(corpus_tags):
@@ -122,17 +167,21 @@ print(how_many_pronouns)
 print(gendered_characters)
 print(gendered_characters_canon)
 
-"""résultats pour les livres de l'univers du seigneur des anneaux:
-{'F/M': 7, 'M/M': 15, 'F/F': 1})
-{'neutral_pronoun': 18871, 'masc_pronoun': 18486, 'fem_pronoun': 917})
-{'neutral_characters': 67, 'male_characters': 6, 'female_characters': 10})
-{'neutral_characters': 2389, 'female_characters': 58, 'male_characters': 89})
 
-canon and heavily implied . . . 
+"""résults for the 3 star wars movies:
+
+{'F/M': 11, 'M/M': 2})
+{'neutral_pronoun': 716, 'fem_pronoun': 105, 'masc_pronoun': 380})
+{'female_characters': 10, 'neutral_characters': 106, 'male_characters': 12})
+{'neutral_characters': 395, 'female_characters': 10, 'male_characters': 19})
 
 
-F/M: Aragorn/Arwen, Faramir/Éowyn, Sam/Rosie
-M/F: Legolas/Tauriel (film), Gimli/Galadriel (fan interpretation)
+cannon and heavily implied relation ships
+
+F/M: Anakin/Padmé, Shmi/Cliegg, Han/Leia
+
+c'est TOUT dans TOUT les films !!!!!!
+
 
 
 
