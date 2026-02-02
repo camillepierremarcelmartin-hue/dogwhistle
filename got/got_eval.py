@@ -22,10 +22,9 @@ models=['F/M','M/M','F/F']
 with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
     reader = csv.DictReader(f,delimiter=";")
     for ligne in reader:
-        if ligne["title_oeuvre"]=='TOLKIEN J. R. R. - Works & Related Fandoms':
+        if ligne["title_oeuvre"]=='A Song of Ice and Fire & Related Fandoms':
           
             relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags'])])
-
 
 Characters = defaultdict(int)
 
@@ -81,27 +80,32 @@ type_of_pronouns=["PRP","PRP$"]
 
 how_many_pronouns=defaultdict(int)
 gendered_characters_canon=defaultdict(int)
-with open("lotr1.txt", "r", encoding="latin-1") as f1:
-    lotr1 = f1.read()
-lotr1_tokens=nltk.word_tokenize(lotr1)
-lotr1_tags=nltk.pos_tag(lotr1_tokens)
+with open("got1.txt", "r", encoding="latin-1") as f1:
+    got1 = f1.read()
+got1_tokens=nltk.word_tokenize(got1)
+got1_tags=nltk.pos_tag(got1_tokens)
 
-with open("lotr2.txt", "r", encoding="latin-1") as f2:
-    lotr2 = f2.read()
-lotr2_tokens=nltk.word_tokenize(lotr2)
-lotr2_tags=nltk.pos_tag(lotr2_tokens)
+with open("got2.txt", "r", encoding="latin-1") as f2:
+    got2 = f2.read()
+got2_tokens=nltk.word_tokenize(got2)
+got2_tags=nltk.pos_tag(got2_tokens)
 
-with open("lotr3.txt", "r", encoding="latin-1") as f3:
-    lotr3 = f3.read()
-lotr3_tokens=nltk.word_tokenize(lotr3)
-lotr3_tags=nltk.pos_tag(lotr3_tokens)
+with open("got3.txt", "r", encoding="latin-1") as f3:
+    got3 = f3.read()
+got3_tokens=nltk.word_tokenize(got3)
+got3_tags=nltk.pos_tag(got3_tokens)
 
-with open("hobbit.txt", "r", encoding="latin-1") as f4:
-    hobbit = f4.read()
-hobbit_tokens=nltk.word_tokenize(hobbit)
-hobbit_tags=nltk.pos_tag(hobbit_tokens)
+with open("got4.txt", "r", encoding="latin-1") as f4:
+    got4 = f4.read()
+got4_tokens=nltk.word_tokenize(got4)
+got4_tags=nltk.pos_tag(got4_tokens)
 
-corpus_tags=lotr1_tags+lotr2_tags+lotr3_tags+hobbit_tags
+with open("got5.txt", "r", encoding="latin-1") as f5:
+    got5 = f5.read()
+got5_tokens=nltk.word_tokenize(got5)
+got5_tags=nltk.pos_tag(got5_tokens)
+
+corpus_tags=got1_tags+got2_tags+got3_tags+got4_tags+got5_tags
 character_list_cannon=[]
 i=0
 while i < len(corpus_tags):
@@ -134,18 +138,6 @@ print(how_many_pronouns)
 print(gendered_characters)
 print(gendered_characters_canon)
 
-"""résultats pour les livres de l'univers du seigneur des anneaux:
-{'F/M': 7, 'M/M': 15, 'F/F': 1})
-{'neutral_pronoun': 18871, 'masc_pronoun': 18486, 'fem_pronoun': 917})
-{'neutral_characters': 67, 'male_characters': 6, 'female_characters': 10})
-{'neutral_characters': 2389, 'female_characters': 58, 'male_characters': 89})
-
-canon and heavily implied . . . 
 
 
-F/M: Aragorn/Arwen, Faramir/Éowyn, Sam/Rosie
-M/F: Legolas/Tauriel (film), Gimli/Galadriel (fan interpretation)
-
-
-
-"""
+"""got sur le bon dieu"""

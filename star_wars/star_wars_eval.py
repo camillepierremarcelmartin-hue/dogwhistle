@@ -74,25 +74,37 @@ with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv
             relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags'])])
 
 
-Characters=defaultdict(int)
-Ship=defaultdict(int)
-RelationShipType=defaultdict(int)
+Characters = defaultdict(int)
+
+
+ShipTypeMap = {}  
+
+
+RelationShipType = defaultdict(int)
+
 for k in relationships:
-    for i in k[1]:
-        Characters[i]+=1
-    for j in k[0]:
-        Ship[j]+=1
-    for h in models:
-        if h in k[2]:
-            RelationShipType[h]+=1
-    
+    ships, chars, types = k  
 
     
-#print(relationships)
+    for c in chars:
+        Characters[c] += 1
 
-print(Characters)
-print(Ship)
-print(RelationShipType)
+    
+    for s in ships:
+        if s not in ShipTypeMap:
+            ShipTypeMap[s] = types[0] if types else "Unknown"
+            RelationShipType[ShipTypeMap[s]] += 1
+
+
+print("Ships with their relationship type:")
+for ship, rtype in ShipTypeMap.items():
+    print(f"{ship}: {rtype}")
+
+
+print("\nRelationship type counts:")
+for rtype, count in RelationShipType.items():
+    print(f"{rtype}: {count}")
+
 
 
 

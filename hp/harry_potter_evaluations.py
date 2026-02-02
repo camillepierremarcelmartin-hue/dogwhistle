@@ -19,15 +19,6 @@ with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv
     cols=csv.reader(datacsv,delimiter=';')
     header=next(cols)
 
-oeuvres=defaultdict(int)
-
-with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
-    reader = csv.DictReader(f,delimiter=";")
-    for ligne in reader:
-        oeuvres[ligne["title_oeuvre"]] += 1
-
-#print(header)
-print(oeuvres)
 
 values = []
 relationships=[]
@@ -40,33 +31,45 @@ with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv
             relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags'])])
 
 
-Characters=defaultdict(int)
-Ship=defaultdict(int)
-RelationShipType=defaultdict(int)
+
+Characters = defaultdict(int)
+
+
+ShipTypeMap = {}  
+
+
+RelationShipType = defaultdict(int)
+
 for k in relationships:
-    for i in k[1]:
-        Characters[i]+=1
-    for j in k[0]:
-        Ship[j]+=1
-    for h in models:
-        if h in k[2]:
-            RelationShipType[h]+=1
-    
+    ships, chars, types = k  
 
     
-#print(relationships)
+    for c in chars:
+        Characters[c] += 1
 
-"""print(Characters)
-print(Ship)
-print(RelationShipType)"""
+    
+    for s in ships:
+        if s not in ShipTypeMap:
+            ShipTypeMap[s] = types[0] if types else "Unknown"
+            RelationShipType[ShipTypeMap[s]] += 1
+
+
+print("Ships with their relationship type:")
+for ship, rtype in ShipTypeMap.items():
+    print(f"{ship}: {rtype}")
+
+
+print("\nRelationship type counts:")
+for rtype, count in RelationShipType.items():
+    print(f"{rtype}: {count}")
 
 
 
 
-d=gender.Detector()
+"""d=gender.Detector()
 gen=d.get_gender("Vader")
 print(gen)
-"""gendered_characters=defaultdict(int)
+gendered_characters=defaultdict(int)
 for k in Characters.keys():
     name=k.split(" ")[0]
     gen=d.get_gender(name)
