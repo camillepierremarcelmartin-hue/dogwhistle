@@ -1,8 +1,17 @@
 import nltk 
 import csv
-from collections import Counter
+from collections import Counter,defaultdict
+import ast
 #nltk.download('punkt_tab')
 #nltk.download('averaged_perceptron_tagger_eng')
+
+
+
+def safe_literal_eval(value):
+    if not value or not value.strip():
+        return []          # or None, depending on what you want
+    return ast.literal_eval(value)
+
 
 s="he she they them her their him it"
 
@@ -16,23 +25,42 @@ with open('data_complete_clean.csv') as datacsv:
     cols=csv.reader(datacsv,delimiter=';')
     header=next(cols)
     
-print(header)
+#print(header)
 
 
 
 
 values = []
-
+relationships=[]
+models=['F/M','M/M','F/F']
 with open('data_complete_clean.csv', newline='', encoding="utf-8") as f:
     reader = csv.DictReader(f,delimiter=";")
     for ligne in reader:
-        values.append(ligne["title_oeuvre"])
+        if ligne["title_oeuvre"]=='Harry Potter - J. K. Rowling':
+          
+            relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags'])])
 
 
-count = Counter(values)
-valeur_max, nb_max = count.most_common(1)[0]
-D_OE=dict(count)
-print(valeur_max)
+Characters=defaultdict(int)
+Ship=defaultdict(int)
+RelationShipType=defaultdict(int)
+for k in relationships:
+    for i in k[1]:
+        Characters[i]+=1
+    for j in k[0]:
+        Ship[j]+=1
+    for h in models:
+        if h in k[2]:
+            RelationShipType[h]+=1
+    
 
-print("Valeur la plus fréquente :", valeur_max)
-print("Nombre d'occurrences :", nb_max)
+    
+#print(relationships)
+
+print(Characters)
+print(Ship)
+print(RelationShipType)
+
+
+
+#For ease of work, we will use the harry potter books series, written by known transphobe and racist JK Rowling
