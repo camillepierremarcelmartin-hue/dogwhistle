@@ -62,51 +62,47 @@ with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv
 
 #print(header)
 #print(oeuvres)
+def get_ships_sw():
+    values = []
+    relationships=[]
+    models=['F/M','M/M','F/F']
+    with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
+        reader = csv.DictReader(f,delimiter=";")
+        for ligne in reader:
+            if ligne["title_oeuvre"]=='Star Wars - All Media Types':
+            
+                relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags']),safe_literal_eval(ligne['published'])])
 
-values = []
-relationships=[]
-models=['F/M','M/M','F/F']
-with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
-    reader = csv.DictReader(f,delimiter=";")
-    for ligne in reader:
-        if ligne["title_oeuvre"]=='Star Wars - All Media Types':
-          
-            relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags'])])
-
+    return relationships
 
 Characters = defaultdict(int)
 
 
-ShipTypeMap = {}  
+from collections import defaultdict
+from copy import deepcopy
+import pandas as pd
+
+def build_df_sw(relationships):
+    current_counts_sw = defaultdict(int)
+
+    timeline_sw= {}
+
+    relationships_sorted_sw = sorted(relationships, key=lambda x: x[3]) 
+
+    for ships, chars, types, published in relationships_sorted_sw:
 
 
-RelationShipType = defaultdict(int)
+        for s in ships:
+            current_counts_sw[s] += 1
 
-for k in relationships:
-    ships, chars, types = k  
-
-    
-    for c in chars:
-        Characters[c] += 1
-
-    
-    for s in ships:
-        if s not in ShipTypeMap:
-            ShipTypeMap[s] = types[0] if types else "Unknown"
-            RelationShipType[ShipTypeMap[s]] += 1
+        timeline_sw[published] = deepcopy(current_counts_sw)
 
 
-print("Ships with their relationship type:")
-for ship, rtype in ShipTypeMap.items():
-    print(f"{ship}: {rtype}")
+    df_sw = pd.DataFrame.from_dict(timeline_sw, orient="index")
 
+    df_sw = df_sw.sort_index().fillna(method="ffill").fillna(0)
 
-print("\nRelationship type counts:")
-for rtype, count in RelationShipType.items():
-    print(f"{rtype}: {count}")
-
-
-
+    return df_sw
 
 
 d=gender.Detector()

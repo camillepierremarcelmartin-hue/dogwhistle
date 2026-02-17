@@ -3,6 +3,7 @@ import csv
 from collections import Counter,defaultdict
 import ast
 import gender_guesser.detector as gender
+from datetime import datetime,date,timedelta
 '''nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger_eng')
@@ -19,54 +20,55 @@ with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv
     cols=csv.reader(datacsv,delimiter=';')
     header=next(cols)
 
+def get_ships_hp():
+    values = []
+    relationships=[]
+    models=['F/M','M/M','F/F']
+    with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
+        reader = csv.DictReader(f,delimiter=";")
+        for ligne in reader:
+            if ligne["title_oeuvre"]=='Harry Potter - J. K. Rowling':
+            
+                relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags']),safe_literal_eval(ligne['published'])])
 
-values = []
-relationships=[]
-models=['F/M','M/M','F/F']
-with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
-    reader = csv.DictReader(f,delimiter=";")
-    for ligne in reader:
-        if ligne["title_oeuvre"]=='Harry Potter - J. K. Rowling':
-          
-            relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags'])])
-
-
+    return relationships
 
 Characters = defaultdict(int)
 
 
-ShipTypeMap = {}  
+from collections import defaultdict
+from copy import deepcopy
+import pandas as pd
+
+def build_df_hp(relationships):
+
+    current_counts_hp = defaultdict(int)
+
+    timeline_hp= {}
+
+    relationships_sorted_hp = sorted(relationships, key=lambda x: x[3]) 
+
+    for ships, chars, types, published in relationships_sorted_hp:
 
 
-RelationShipType = defaultdict(int)
+        for s in ships:
+            current_counts_hp[s] += 1
 
-for k in relationships:
-    ships, chars, types = k  
+        timeline_hp[published] = deepcopy(current_counts_hp)
 
+
+    df_hp = pd.DataFrame.from_dict(timeline_hp, orient="index")
+
+    df_hp = df_hp.sort_index().fillna(method="ffill").fillna(0)
     
-    for c in chars:
-        Characters[c] += 1
-
-    
-    for s in ships:
-        if s not in ShipTypeMap:
-            ShipTypeMap[s] = types[0] if types else "Unknown"
-            RelationShipType[ShipTypeMap[s]] += 1
-
-
-print("Ships with their relationship type:")
-for ship, rtype in ShipTypeMap.items():
-    print(f"{ship}: {rtype}")
-
-
-print("\nRelationship type counts:")
-for rtype, count in RelationShipType.items():
-    print(f"{rtype}: {count}")
+    return df_hp
 
 
 
 
-"""d=gender.Detector()
+
+
+d=gender.Detector()
 gen=d.get_gender("Vader")
 print(gen)
 gendered_characters=defaultdict(int)
@@ -148,7 +150,7 @@ while i < len(corpus_tags):
                 gendered_characters_canon['female_characters']+=1
             else:
                 gendered_characters_canon['neutral_characters']+=1
-    i+=1"""
+    i+=1
 
 """print(how_many_pronouns)
 print(gendered_characters)
