@@ -19,12 +19,12 @@ def get_ships_lotr():
     values = []
     relationships=[]
     models=['F/M','M/M','F/F']
-    with open('/cal/exterieurs/cmartin-24/Desktop/dogwhistle/data_complete_clean.csv', newline='', encoding="utf-8") as f:
+    with open('data_complete_clean.csv', newline='', encoding="utf-8") as f:
         reader = csv.DictReader(f,delimiter=";")
         for ligne in reader:
             if ligne["title_oeuvre"]=='TOLKIEN J. R. R. - Works & Related Fandoms':
             
-                relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags']),safe_literal_eval(ligne('published'))])
+                relationships.append([safe_literal_eval(ligne["relationship tags"]),safe_literal_eval(ligne['character tags']),safe_literal_eval(ligne['category tags']),safe_literal_eval(ligne['published'])])
 
     return relationships
 
