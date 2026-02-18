@@ -5,6 +5,7 @@ import ast
 import gender_guesser.detector as gender
 from copy import deepcopy
 import pandas as pd
+import numpy as np
 
 '''nltk.download('punkt')
 nltk.download('punkt_tab')
@@ -39,8 +40,27 @@ Characters = defaultdict(int)
 
 
 def normalize_ship(ship):
-    chars = sorted([c.strip() for c in ship.split("/")])
-    return "/".join(chars)
+
+    if isinstance(ship, list):
+        normalized_list = []
+        for s in ship:
+            norm = normalize_ship(s)
+            if norm:
+                normalized_list.append(norm)
+        return normalized_list
+    if str(ship).lower() == "nan":
+        return None
+    if "&" in ship:
+        return None
+
+    chars = [c.strip() for c in ship.split("/")]
+    chars_sorted = sorted(chars)
+
+    return "/".join(chars_sorted)
+
+    
+    
+  
 
 
 
@@ -68,24 +88,34 @@ def build_df_hp(relationships):
     df_hp = pd.DataFrame.from_dict(timeline_hp, orient="index")
 
     df_hp = df_hp.sort_index().ffill().fillna(0)
-    
-    return df_hp
+    df_clean = df_hp.loc[:, [col for col in df_hp.columns if col is not None and not (isinstance(col, float) and np.isnan(col)) and str(col).lower() != "nan"]]
+    return df_clean
 
 
 
 def get_stats_hp(relationships):
 
     unique_ships = set()
+    ship_to_characters = {}
 
     for ships, chars, types, published in relationships:
         for ship in ships:
-            unique_ships.add(normalize_ship(ship))
 
-    ship_to_characters = {}
+            normalized = normalize_ship(ship)
 
-    for ship in unique_ships:
-        characters = [c.strip() for c in ship.split("/")]
-        ship_to_characters[ship] = characters
+            if not normalized:
+                continue
+
+         
+            unique_ships.add(normalized)
+
+        
+            if normalized not in ship_to_characters:
+                characters = [c.strip() for c in normalized.split("/")]
+                ship_to_characters[normalized] = characters
+
+
+
 
     type_counts = defaultdict(int)
 

@@ -5,6 +5,7 @@ import ast
 import gender_guesser.detector as gender
 from copy import deepcopy
 import pandas as pd
+import numpy as np
 '''nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger_eng')
@@ -17,8 +18,23 @@ def safe_literal_eval(value):
     return ast.literal_eval(value)
 
 def normalize_ship(ship):
-    chars = sorted([c.strip() for c in ship.split("/")])
-    return "/".join(chars)
+
+    if isinstance(ship, list):
+        normalized_list = []
+        for s in ship:
+            norm = normalize_ship(s)
+            if norm:
+                normalized_list.append(norm)
+        return normalized_list
+    if str(ship).lower() == "nan":
+        return None
+    if "&" in ship:
+        return None
+
+    chars = [c.strip() for c in ship.split("/")]
+    chars_sorted = sorted(chars)
+
+    return "/".join(chars_sorted)
 
 
 def get_ships_got():
@@ -61,23 +77,29 @@ def build_df_got(relationships):
     df_got = pd.DataFrame.from_dict(timeline_got, orient="index")
 
     df_got = df_got.sort_index().ffill().fillna(0)
-
-    return df_got
+    df_clean = df_got.loc[:, [col for col in df_got.columns if col is not None and not (isinstance(col, float) and np.isnan(col)) and str(col).lower() != "nan"]]
+    return df_clean
 
 
 def get_stats_got(relationships):
     unique_ships = set()
+    ship_to_characters = {}
 
     for ships, chars, types, published in relationships:
         for ship in ships:
-            unique_ships.add(normalize_ship(ship))
 
-    ship_to_characters = {}
+            normalized = normalize_ship(ship)
 
-    for ship in unique_ships:
-        characters = [c.strip() for c in ship.split("/")]
-        ship_to_characters[ship] = characters
+            if not normalized:
+                continue
 
+         
+            unique_ships.add(normalized)
+
+        
+            if normalized not in ship_to_characters:
+                characters = [c.strip() for c in normalized.split("/")]
+                ship_to_characters[normalized] = characters
     type_counts = defaultdict(int)
 
     for ships, chars, types, published in relationships:
