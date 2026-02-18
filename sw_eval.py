@@ -4,6 +4,8 @@ from collections import Counter,defaultdict
 import ast
 import gender_guesser.detector as gender
 import os
+from copy import deepcopy
+import pandas as pd
 '''nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger_eng')
@@ -14,6 +16,10 @@ def safe_literal_eval(value):
     if not value or not value.strip():
         return []          
     return ast.literal_eval(value)
+
+def normalize_ship(ship):
+    chars = sorted([c.strip() for c in ship.split("/")])
+    return "/".join(chars)
 
 #Needed to modify some text files to make it so that it works properly haha
 
@@ -78,10 +84,6 @@ def get_ships_sw():
 Characters = defaultdict(int)
 
 
-from collections import defaultdict
-from copy import deepcopy
-import pandas as pd
-
 def build_df_sw(relationships):
     current_counts_sw = defaultdict(int)
 
@@ -91,24 +93,48 @@ def build_df_sw(relationships):
 
     for ships, chars, types, published in relationships_sorted_sw:
 
+        if isinstance(published, list):
+            published = published[0]
+
 
         for s in ships:
-            current_counts_sw[s] += 1
+            s_n=normalize_ship(s)
+            current_counts_sw[s_n] += 1
 
         timeline_sw[published] = deepcopy(current_counts_sw)
 
 
     df_sw = pd.DataFrame.from_dict(timeline_sw, orient="index")
 
-    df_sw = df_sw.sort_index().fillna(method="ffill").fillna(0)
+    df_sw = df_sw.sort_index().ffill().fillna(0)
 
     return df_sw
 
-def get_stats_sw():
-
+def get_stats_sw(relationships):
     d=gender.Detector()
-    gen=d.get_gender("Vader")
-    print(gen)
+    unique_ships = set()
+
+    for ships, chars, types, published in relationships:
+        for ship in ships:
+            unique_ships.add(normalize_ship(ship))
+
+    ship_to_characters = {}
+
+    for ship in unique_ships:
+        characters = [c.strip() for c in ship.split("/")]
+        ship_to_characters[ship] = characters
+
+    type_counts = defaultdict(int)
+
+    for ships, chars, types, published in relationships:
+        for t in types:
+            type_counts[t] += 1
+
+   
+    for t, count in type_counts.items():
+        print(f"{t} : {count}")
+
+    
     gendered_characters=defaultdict(int)
     for k in Characters.keys():
         name=k.split(" ")[0]
@@ -172,7 +198,7 @@ def get_stats_sw():
                     gendered_characters_canon['neutral_characters']+=1
         i+=1
 
-    return how_many_pronouns,gendered_characters,gendered_characters_canon
+    return how_many_pronouns,gendered_characters,gendered_characters_canon,unique_ships,ship_to_characters,type_counts
 
 
 

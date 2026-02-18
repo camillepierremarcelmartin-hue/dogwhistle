@@ -3,6 +3,9 @@ import csv
 from collections import Counter,defaultdict
 import ast
 import gender_guesser.detector as gender
+from copy import deepcopy
+import pandas as pd
+
 '''nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger_eng')
@@ -13,6 +16,10 @@ def safe_literal_eval(value):
     if not value or not value.strip():
         return []          
     return ast.literal_eval(value)
+
+def normalize_ship(ship):
+    chars = sorted([c.strip() for c in ship.split("/")])
+    return "/".join(chars)
 
 
 def get_ships_lotr():
@@ -31,9 +38,6 @@ def get_ships_lotr():
 Characters = defaultdict(int)
 
 
-from collections import defaultdict
-from copy import deepcopy
-import pandas as pd
 
 def build_df_lotr(relationships):
 
@@ -45,20 +49,45 @@ def build_df_lotr(relationships):
 
     for ships, chars, types, published in relationships_sorted_lotr:
 
+        if isinstance(published, list):
+            published = published[0]
+
 
         for s in ships:
-            current_counts_lotr[s] += 1
+            s_n=normalize_ship(s)
+            current_counts_lotr[s_n] += 1
 
         timeline_lotr[published] = deepcopy(current_counts_lotr)
 
 
     df_lotr = pd.DataFrame.from_dict(timeline_lotr, orient="index")
 
-    df_lotr = df_lotr.sort_index().fillna(method="ffill").fillna(0)
+    df_lotr = df_lotr.sort_index().ffill().fillna(0)
 
     return df_lotr
 
-def get_stats_lotr():
+def get_stats_lotr(relationships):
+    unique_ships = set()
+
+    for ships, chars, types, published in relationships:
+        for ship in ships:
+            unique_ships.add(normalize_ship(ship))
+
+    ship_to_characters = {}
+
+    for ship in unique_ships:
+        characters = [c.strip() for c in ship.split("/")]
+        ship_to_characters[ship] = characters
+
+    type_counts = defaultdict(int)
+
+    for ships, chars, types, published in relationships:
+        for t in types:
+            type_counts[t] += 1
+
+   
+    for t, count in type_counts.items():
+        print(f"{t} : {count}")
     d=gender.Detector()
     gendered_characters=defaultdict(int)
     for k in Characters.keys():
@@ -127,7 +156,7 @@ def get_stats_lotr():
                     gendered_characters_canon['neutral_characters']+=1
         i+=1
 
-    return how_many_pronouns,gendered_characters,gendered_characters_canon  
+    return how_many_pronouns,gendered_characters,gendered_characters_canon,unique_ships,ship_to_characters,type_counts
 
 
 """résultats pour les livres de l'univers du seigneur des anneaux:

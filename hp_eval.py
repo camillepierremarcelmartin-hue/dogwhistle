@@ -3,7 +3,9 @@ import csv
 from collections import Counter,defaultdict
 import ast
 import gender_guesser.detector as gender
-from datetime import datetime,date,timedelta
+from copy import deepcopy
+import pandas as pd
+
 '''nltk.download('punkt')
 nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger_eng')
@@ -36,9 +38,11 @@ def get_ships_hp():
 Characters = defaultdict(int)
 
 
-from collections import defaultdict
-from copy import deepcopy
-import pandas as pd
+def normalize_ship(ship):
+    chars = sorted([c.strip() for c in ship.split("/")])
+    return "/".join(chars)
+
+
 
 def build_df_hp(relationships):
 
@@ -50,28 +54,47 @@ def build_df_hp(relationships):
 
     for ships, chars, types, published in relationships_sorted_hp:
 
+        if isinstance(published, list):
+            published = published[0]
+
 
         for s in ships:
-            current_counts_hp[s] += 1
+            s_n=normalize_ship(s)
+            current_counts_hp[s_n] += 1
 
         timeline_hp[published] = deepcopy(current_counts_hp)
 
 
     df_hp = pd.DataFrame.from_dict(timeline_hp, orient="index")
 
-    df_hp = df_hp.sort_index().fillna(method="ffill").fillna(0)
+    df_hp = df_hp.sort_index().ffill().fillna(0)
     
     return df_hp
 
 
 
+def get_stats_hp(relationships):
 
+    unique_ships = set()
 
-def get_stats_hp():
+    for ships, chars, types, published in relationships:
+        for ship in ships:
+            unique_ships.add(normalize_ship(ship))
+
+    ship_to_characters = {}
+
+    for ship in unique_ships:
+        characters = [c.strip() for c in ship.split("/")]
+        ship_to_characters[ship] = characters
+
+    type_counts = defaultdict(int)
+
+    for ships, chars, types, published in relationships:
+        for t in types:
+            type_counts[t] += 1
+
 
     d=gender.Detector()
-    gen=d.get_gender("Vader")
-    print(gen)
     gendered_characters=defaultdict(int)
     for k in Characters.keys():
         name=k.split(" ")[0]
@@ -153,7 +176,8 @@ def get_stats_hp():
                     gendered_characters_canon['neutral_characters']+=1
         i+=1
 
-    return how_many_pronouns,gendered_characters,gendered_characters_canon
+    return how_many_pronouns,gendered_characters,gendered_characters_canon,unique_ships,ship_to_characters,type_counts
+
 """Résultats pour Harry Potter
 {'neutral_pronoun': 27795, 'masc_pronoun': 44252, 'fem_pronoun': 10758})
 {'male_characters': 37, 'neutral_characters': 39, 'female_characters': 25})
